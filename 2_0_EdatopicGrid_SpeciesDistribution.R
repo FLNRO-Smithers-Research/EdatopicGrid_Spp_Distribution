@@ -2,26 +2,60 @@
 ######################################################################
 #####CREATE EDATOPIC GRIDS WITH VEG STATS IN EACH CELL################
 ###############################################################
+##Kiri Daust, July 2018
+##MacKenzie, August 2018 extensive updates
+
+.libPaths("E:/R packages351")
+#install.packages("Hmisc")
+require(reshape)
+require(reshape2)
+require(vegan)
+require(caret)
+require(tcltk)
+require(randomForest)
+require(Matrix)
+require(labdsv)
+require(gdata)
+require(MASS)
+require(openxlsx)
+require (C50)
+require(tidyr)
+require(stringr)
+require(rpart)
+require(tree)
+require(rattle)
+require(rpart.plot)
+require(partykit)
+require(vegclust)
+require(standardize)
+require(dplyr)
+require(tictoc)
+require(plyr)
+require(Hmisc)
+require(ggplot2)
+require(ggdendro)
+require(pvclust)
+require(dendextend)
+require(ape)
+rm(list=ls())
+wd=tk_choose.dir(); setwd(wd)
 
 ###Function used above to combine data into formatted string
 combineSpp <- function(x){ x <- x[order(-x$Order),]
   if(any(x$Pres == 1)){
     dom <- paste(x$Species[x$Pres == 1], collapse = ",")
     dom <- paste("*",dom,"*", sep = "") }else{ dom <- ""  }
-  
   if(any(x$Pres == 2)){sub <- x$Species[x$Pres == 2]
     if(length(sub) > 5){
       sec <- paste("(", paste(sub[1:4], collapse = ","),"\n",paste(sub[5:length(sub)], collapse = ","),")",sep = "")
     }else{sec <- paste(sub, collapse = ",")    }
   }else{    sec <- ""  }
-  
   if(any(x$Pres == 3)){sub <- x$Species[x$Pres == 3]
     if(length(sub) > 5){un <- paste("(", paste(sub[1:4], collapse = ","),"\n",paste(sub[5:length(sub)], collapse = ","),")",sep = "")
     }else{      un <- paste(sub, collapse = ",")
       un <- paste("(",un,")", sep = "")    }
   }else{    un <- ""  }
     return(paste(dom,"\n", sec, "\n", un, sep = ""))}
-
 ####Import Raw vegetation data
 vegAll <- read.table("BECMasterVeg_Oct26_2018.txt", header = TRUE) # R export from Vpro
 codeCross <- read.csv("CodeCrosswalk.csv", stringsAsFactors = FALSE)
