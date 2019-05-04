@@ -4,6 +4,8 @@
 ###############################################################
 ##Kiri Daust, July 2018
 ##MacKenzie, August 2018 extensive updates
+# Builds edatopic grids by subzone variant showing species abundance in three categories
+#by edatopic position from BECMaster Plot data records
 
 .libPaths("E:/R packages351")
 #install.packages("Hmisc")
@@ -56,9 +58,12 @@ combineSpp <- function(x){ x <- x[order(-x$Order),]
       un <- paste("(",un,")", sep = "")    }
   }else{    un <- ""  }
     return(paste(dom,"\n", sec, "\n", un, sep = ""))}
+
+output.folder = ("../../../Output") # location of model outputs 
+
 ####Import Raw vegetation data
 vegAll <- read.table("BECMasterVeg_Oct26_2018.txt", header = TRUE) # R export from Vpro
-codeCross <- read.csv("CodeCrosswalk.csv", stringsAsFactors = FALSE)
+codeCross <- read.csv("CodeCrosswalk.csv", stringsAsFactors = FALSE) #tree species codes
 
 vegAll <- separate(vegAll, Species, c("Species","Type"), "-", remove = TRUE)
 vegAll <- vegAll[vegAll$Type %in% c(1,2),]
@@ -69,7 +74,7 @@ BGCLookup <- BGCLookup[BGCLookup$BGC_LABEL != "",]
 colnames(BGCLookup)[1] <- "PlotNumber"
 
 ##import edatopic data
-plotEnv <- read.csv("KiriEnvDat.csv", stringsAsFactors = FALSE)
+plotEnv <- read.csv("KiriEnvDat.csv", stringsAsFactors = FALSE)# plot, smr, snr, BGC
 plotEnv <- plotEnv[plotEnv$NutrientRegime %in% c("A","B","C","D","E"),]
 plotEnv <- plotEnv[plotEnv$MoistureRegime %in% c(0,1,2,3,4,5,6,7,8),]
 plotEnv <- plotEnv[,-2]
@@ -78,7 +83,8 @@ plotEnv$BGC_LABEL <- gsub("[[:space:]]","",plotEnv$BGC_LABEL)
 plotEnv <- plotEnv[plotEnv$BGC_LABEL != "",]
 colnames(plotEnv)[4] <- "Unit"
 
-modBGC <- read.csv("ModelledBGC_Forested.csv", stringsAsFactors = FALSE)
+modBGC <- read.csv("ModelledBGC_Forested_err_removed.csv", stringsAsFactors = FALSE)
+##problems with missing info. ESSFmmw, MHun, MHunp,MSun, SWBvk, SWBvks
 
 for(i in 1:length(modBGC$BGC)){
   Unit <- modBGC$BGC[i]
@@ -121,8 +127,10 @@ for(i in 1:length(modBGC$BGC)){
     vegGrid <- unique(vegGrid[,c(1:3,7)])
     
     ##plot
-    pdf(file = paste("EdaGrid_",Unit,".pdf",sep = ""), height = 10.5, paper = "letter")
-    print(ggplot(data = vegGrid)+
+   pdf(file = paste("Output/", "EdaGrid_",Unit,".pdf",sep = ""), height = 10.5, paper = "letter")
+    #pdf(file = paste("EdaGrid_",Unit,".pdf",sep = ""), height = 10.5, paper = "letter")
+    
+        print(ggplot(data = vegGrid)+
             geom_tile(aes(x= Alph, y = Numeric), color = "black", fill = "white")+
             geom_text(aes(x = Alph, y = Numeric, label = Lab), size = 3)+
             geom_text(aes(x = Alph, y = Numeric, label = Num,hjust = -4, vjust = -6), size = 2, color = "red")+
